@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yzm.majoryc.mapper.UserRoleMapper">
+    <resultMap id="BaseResultMap" type="com.yzm.majoryc.DO.admin.UserDO">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="username" jdbcType="VARCHAR" property="username"/>
+        <result column="password" jdbcType="VARCHAR" property="password"/>
+        <result column="sex" jdbcType="INTEGER" property="sex"/>
+        <result column="phone" jdbcType="VARCHAR" property="phone"/>
+        <result column="email" jdbcType="VARCHAR" property="email"/>
+        <result column="avatar" jdbcType="VARCHAR" property="avatar"/>
+        <result column="created" jdbcType="TIMESTAMP" property="created"/>
+        <result column="updated" jdbcType="TIMESTAMP" property="updated"/>
+    </resultMap>
+    <!--添加用户对于的角色-->
+    <insert id="addUserRole">
+        insert into tb_user_role (user_id,role_id) values
+        <foreach collection="userRoleVos" item="item" separator="," index="index">
+            (#{item.userId},#{item.roleId})
+        </foreach>
+    </insert>
+
+    <!--删除用户对应的角色-->
+    <delete id="deleteUserRoleByUserId">
+        delete from tb_user_role where user_id=#{userId}
+    </delete>
+</mapper>

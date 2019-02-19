@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yzm.majoryc.mapper.OrderMapper">
+    <resultMap id="Base_Result_Map" type="com.yzm.majoryc.DO.order.OrderDO">
+        <result column="order_id" property="orderId"></result>
+        <result column="buyer_name" property="buyerName"></result>
+        <result column="status" property="status"></result>
+        <result column="create_time" property="createTime"></result>
+        <result column="update_time" property="updateTime"></result>
+    </resultMap>
+
+    <resultMap id="order_info_map" type="com.yzm.majoryc.DO.order.OrderInfoDO">
+        <result column="tread_num" property="treadNum"></result>
+        <result column="color" property="color"></result>
+        <result column="material_type" property="materialType"></result>
+        <result column="tread_type" property="treadType"></result>
+        <result column="total" property="total"></result>
+        <result column="surplus" property="surplus"></result>
+        <result column="remark" property="remark"></result>
+    </resultMap>
+    <resultMap id="daily_map" type="com.yzm.majoryc.DO.order.DailyDO">
+        <id property="id" column="id"></id>
+        <result column="info_id" property="infoId"></result>
+        <result column="output" property="output"></result>
+        <result column="work_shift" property="workShift"></result>
+        <result column="surplus" property="surplus"></result>
+        <result column="time" property="time"></result>
+        <result column="tread_num" property="treadNum"></result>
+    </resultMap>
+    <sql id="order_column_sql">
+        order_id,buyer_name,status,create_time,update_time
+    </sql>
+    <sql id="order_info_column_sql">
+        id, order_id,tread_num, color, material_type ,tread_type,total,surplus,remark
+    </sql>
+    <sql id="daily_column_sql">
+        id,info_id,output,work_shift,surplus,time,tread_num
+    </sql>
+    <select id="orderList" resultMap="Base_Result_Map">
+        select
+        <include refid="order_column_sql"></include>
+        from tb_order
+        <where>
+            <if test="time!=null and time!=''">
+                and date_format(create_time,'%Y-%m-%d')=#{time}
+            </if>
+            <if test="status!=null and status!=''">
+                and status=#{status}
+            </if>
+            <if test="buyerName!=null and buyerName!=''">
+                and buyer_name like concat(#{buyerName},'%')
+            </if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="orderInfoList" resultMap="order_info_map">
+        select
+        <include refid="order_info_column_sql"></include>
+        from tb_order_info
+        <where>
+            <if test="orderId!=null and orderId!=''">
+                and order_id=#{orderId}
+            </if>
+        </where>
+    </select>
+
+    <insert id="addOrder" parameterType="com.yzm.majoryc.DTO.OrderInfoDTO">
+        insert into tb_order
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="orderId != null">
+                order_id,
+            </if>
+            <if test="buyerName != null">
+                buyer_name,
+            </if>
+            <if test="status != null">
+                status,
+            </if>
+            <if test="createTime != null">
+                create_time,
+            </if>
+            <if test="updateTime != null">
+                update_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="orderId != null">
+                #{orderId},
+            </if>
+            <if test="buyerName != null">
+                #{buyerName},
+            </if>
+            <if test="status != null">
+                #{status},
+            </if>
+            <if test="createTime != null">
+                #{createTime},
+            </if>
+            <if test="updateTime != null">
+                #{updateTime},
+            </if>
+        </trim>
+    </insert>
+    <!--添加子订单-->
+    <insert id="addOrderInfo" parameterType="com.yzm.majoryc.VO.order.OrderInfoVO">
+        insert into tb_order_info
+        (order_id,tread_num,color,material_type,tread_type,total,surplus,remark)
+        values
+        <foreach collection="orderInfoList" index="index" separator="," item="info">
+            (#{info.orderId},
+            #{info.treadNum},
+            #{info.color},
+            #{info.materialType},
+            #{info.treadType},
+            #{info.total},
+            #{info.total},
+            #{info.remark})
+        </foreach>
+    </insert>
+
+    <delete id="deleteOrder">
+        delete from tb_order where order_id=#{orderId}
+    </delete>
+
+    <delete id="deleteOrderInfo">
+        delete from tb_order_info where order_id=#{orderId}
+    </delete>
+
+    <update id="updateOrder" parameterType="com.yzm.majoryc.DTO.OrderInfoDTO">
+        update tb_order
+        <set>
+            <if test="buyerName != null">
+                buyer_name = #{buyerName},
+            </if>
+            <if test="status != null">
+                status = #{status},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime},
+            </if>
+        </set>
+        where order_id=#{orderId}
+    </update>
+
+    <update id="updateOrderInfo" parameterType="java.util.List">
+        <foreach collection="orderInfoList" separator=";" item="info">
+            update tb_order_info
+            <set>
+                <if test="info.treadNum!=null">
+                    tread_num=#{info.treadNum},
+                </if>
+                <if test="info.color!=null and info.color!=''">
+                    color=#{info.color},
+                </if>
+                <if test="info.materialType!=null and info.materialType!=''">
+                    material_type=#{info.materialType},
+                </if>
+                <if test="info.treadType!=null and info.treadType!=''">
+                    tread_type=#{info.treadType},
+                </if>
+                <if test="info.total!=null">
+                    total=#{info.total},
+                </if>
+                <if test="info.surplus!=null">
+                    surplus=#{info.surplus},
+                </if>
+                <if test="info.remark!=null and info.remark!=''">
+                    remark=#{info.remark},
+                </if>
+            </set>
+            where id=#{info.id}
+        </foreach>
+    </update>
+
+    <insert id="addDaily" parameterType="com.yzm.majoryc.VO.order.DailyVO">
+        insert into tb_daily (info_id,surplus,output,work_shift,time,tread_num)
+        values (#{infoId},#{surplus},#{output},#{workShift},#{time},#{treadNum})
+    </insert>
+
+    <update id="updateInfoSurplus">
+        update tb_order_info set surplus=#{surplus} where id=#{id}
+    </update>
+
+    <select id="getInfoSurplus" resultType="java.lang.Integer">
+        select surplus from tb_order_info where id=#{id}
+    </select>
+
+    <update id="updateOrderStatus">
+        update tb_order set status=#{status} where order_id=#{orderId}
+    </update>
+
+
+    <select id="dailyList" resultMap="daily_map">
+        select
+        <include refid="daily_column_sql"></include>
+        from tb_daily
+        <where>
+            <if test="time!=null and time!=''">
+                and date_format(time,'%Y-%m-%d')=#{time}
+            </if>
+            <if test="workShift!=null and workShift!=''">
+                and work_shift=#{workShift}
+            </if>
+            <if test="treadNum!=null and treadNum!=''">
+                and tread_num like concat(#{treadNum},'%')
+            </if>
+        </where>
+        order by time desc
+    </select>
+
+    <select id="shiftOutput" resultType="com.yzm.majoryc.DTO.DailyDTO">
+        select  sum(output) as output ,work_shift as workShift,DATE_FORMAT(time,'%Y-%m-%d') as time
+        from tb_daily
+        group by DATE_FORMAT(time,'%Y%M%d'),work_shift
+    </select>
+
+    <select id="outputDay" resultType="com.yzm.majoryc.DTO.DailyDTO">
+        select sum(output) as output ,DATE_FORMAT(time,'%Y-%m-%d') as time
+        from tb_daily group by DATE_FORMAT(time,'%Y%m%d')
+    </select>
+</mapper>
