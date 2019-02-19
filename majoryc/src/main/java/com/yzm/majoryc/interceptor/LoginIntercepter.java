@@ -27,7 +27,6 @@ public class LoginIntercepter implements HandlerInterceptor {
         String token = request.getHeader("token");
         if (!StringUtils.isBlank(token)) {
             if (redisService.hasKey(token)) {
-                String json = redisService.get(token);
                 redisService.flushToken(token, TokenConstant.expire, TimeUnit.SECONDS);
                 return true;
             }
