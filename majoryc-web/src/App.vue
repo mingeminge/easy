@@ -1,0 +1,14 @@
+<template>
+  <div id="app" style="height: 100%">
+    <router-view/>
+  </div>
+</template>
+
+<script>
+  export default {
+    name: 'App',
+    mounted() {
+      document.body.removeChild(document.getElementById('Loading'))
+    }
+  }
+</script>
