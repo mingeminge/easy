@@ -3,6 +3,8 @@
 
 #majoryc
 [线上体验地址](http://47.105.230.85);
+账号 admin
+密码 admin
 
 
 做的一个前后分离的demo
