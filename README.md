@@ -8,4 +8,3 @@
 模板是vue-element-template（地址：https://github.com/PanJiaChen/vue-admin-template 其他功能需要自己加 ）
 
 后台是springboot+mybatis
-简单的做了个demo
